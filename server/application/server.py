@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 
+from middleware import middleware
+
 
 secure_shared_service = Flask(__name__)
+secure_shared_service.wsgi_app = middleware(secure_shared_service.wsgi_app)
+
 api = Api(secure_shared_service)
 
 
