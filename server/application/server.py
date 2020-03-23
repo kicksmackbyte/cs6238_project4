@@ -3,19 +3,55 @@ from flask_restful import Resource, Api
 
 from middleware import middleware
 
+from functools import wraps
+
 
 secure_shared_service = Flask(__name__)
-secure_shared_service.wsgi_app = middleware(secure_shared_service.wsgi_app)
-
 api = Api(secure_shared_service)
 
 
+def check_permission(permission):
+    @wraps(permission)
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            nonlocal permission
+
+            auth_header = request.headers.get('Authorization')
+            if auth_header:
+                try:
+                    auth_token = auth_header.split(' ')[1]
+                except IndexError:
+                    response = {
+                            'status': 'fail',
+                            'message': 'Bearer token malformed',
+                        }
+
+                    return response
+            else:
+                auth_token = None
+
+            if auth_token:
+                token_data = jwt.decode(auth_token)
+                access = token_data.get(permission)
+
+                if not access:
+                    raise Exception('not authorized')
+
+            return func(*args, **kwargs)
+
+        return wrapper
+    return decorator
+
+
 class welcome(Resource):
+
     def get(self):
         return "Welcome to the secure shared server!"
 
 
 class login(Resource):
+
     def post(self):
         data = request.get_json()
 
@@ -43,6 +79,8 @@ class login(Resource):
 
 
 class checkout(Resource):
+    method_decorators = [check_permission('checkout')]
+
     def post(self):
         data = request.get_json()
 
@@ -60,6 +98,8 @@ class checkout(Resource):
 
 
 class checkin(Resource):
+    method_decorators = [check_permission('checkin')]
+
     def post(self):
         data = request.get_json()
 
@@ -75,6 +115,8 @@ class checkin(Resource):
 
 
 class grant(Resource):
+    method_decorators = [check_permission('grant')]
+
     def post(self):
         data = request.get_json()
 
@@ -90,6 +132,8 @@ class grant(Resource):
 
 
 class delete(Resource):
+    method_decorators = [check_permission('delete')]
+
     def post(self):
         data = request.get_json()
 
