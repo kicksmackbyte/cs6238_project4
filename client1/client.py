@@ -145,9 +145,10 @@ def grant(document_id, target_user, access, duration):
 
 
 def delete(document_id):
-    '''
-        # TODO: Accept the DID to be deleted.
-    '''
+
+    body = {
+        'document_id': document_id,
+    }
 
     response = post_request(
         server_name=server_name,
