@@ -162,10 +162,10 @@ def delete(document_id):
 
 
 def logout():
-    '''
-        # TODO: Ensure all the modified checked out documents are checked back in.
-            The request body should contain the user-id, session-token
-    '''
+
+    checked_out_documents = [] #TODO: Read documents/checkedout directory
+    for document_id in checked_out_documents:
+        checkin(document_id, 2)
 
     response = post_request(
         server_name=server_name,
@@ -175,7 +175,7 @@ def logout():
         node_key=node_key,
     )
 
-    exit() #exit the program
+    exit()
 
 
 def main():
