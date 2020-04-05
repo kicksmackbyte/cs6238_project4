@@ -116,24 +116,22 @@ def checkout(document_id):
         node_key=node_key,
     )
 
-
     output_path = os.path.join(BASE_DIR, 'documents', 'checkin', document_id)
     with open(output_path, 'wb') as document:
         binary_file = response.content['document']
         document.write(binary_file)
 
-
     return response
 
 
 def grant(document_id, target_user, access, duration):
-    '''
-        # TODO: Accept the
-            - DID
-            - target user to whom access should be granted (0 for all user)
-            - type of acess to be granted (1 - checkin, 2 - checkout, 3 - both checkin and checkout)
-            - time duration (in seconds) for which acess is granted
-    '''
+
+    body = {
+        'document_id': document_id,
+        'target_user': target_user,
+        'access': access,
+        'duration': duration,
+    }
 
     response = post_request(
         server_name=server_name,
