@@ -80,19 +80,14 @@ def login(user_id, filename):
 
 
 def checkin(document_id, security_flag):
-    '''
-        # TODO: Accept the
-            - DID
-            - security flag (1 for confidentiality  and 2 for integrity)
-            Send the request to server with required parameters (action = 'checkin') using post_request().
-            The request body should contain the required parameters to ensure the file is sent to the server.
-    '''
 
     body = {
-        'user-id': user_id,
-        'statement': statement,
-        'signed-statement': signed_statement,
+        'document_id': document_id,
+        'security_flag': security_flag,
     }
+
+    with open(document_id, 'rb') as binary_file:
+        body['binary_file'] = binary_file
 
     response = post_request(
         server_name=server_name,
