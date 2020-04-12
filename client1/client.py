@@ -4,6 +4,7 @@ import requests
 
 
 import Crypto.Hash.MD5 as MD5
+from Crypto.PublicKey import RSA
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHECK_OUT_DIR = os.path.join(BASE_DIR, 'documents', 'checkout')
@@ -42,28 +43,23 @@ def post_request(server_name, action, body, node_certificate, node_key):
     return response
 
 
-class PrivateKey(object):
+def _sign_statement(private_key_path, message):
+    private_key = None
 
-    def __init__(self, filename):
-        with open(filename, 'r') as private_key_file:
-            self.key = private_key_file
+    with open(private_key_path, 'r') as private_key_file:
+        private_key = RSA.importKey(private_key_file)
 
-        os.remove(filename)
+    hashed_message = MD5.new(message).digest()
+    signed_message = private_key.encrypt(hashed_message)
 
-
-    def sign(message):
-        hashed_message = MD5.new(message).digest()
-        signed_message = self.key.sign(hashed_message)
-
-        return signed_message
+    return signed_message
 
 
-def login(user_id, filename):
+def login(user_id, private_key_path):
 
     statement = 'Client%s as User%s logs into the Server' % (1, user_id)
 
-    private_key = PrivateKey(filename)
-    signed_statement = private_key.sign(statement)
+    signed_statement = _sign_statement(private_key_path, statement)
 
     body = {
         'user_id': user_id,
