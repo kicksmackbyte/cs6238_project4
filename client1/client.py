@@ -15,6 +15,7 @@ gt_username = 'agarcia327'
 server_name = 'secure-shared-store'
 node_certificate = 'certs/CA.crt'
 node_key = 'certs/CA.key'
+session_token = None
 
 
 ''' <!!! DO NOT MODIFY THIS FUNCTION !!!>'''
@@ -75,6 +76,8 @@ def login(user_id, private_key_path):
         node_key=node_key,
     )
 
+    session_token = response['session_token']
+
     return response
 
 
@@ -89,6 +92,7 @@ def checkin(document_id, security_flag):
     body = {
         'document_id': document_id,
         'security_flag': security_flag,
+        'session_token': session_token,
     }
 
     with open(checked_in_file, 'rb') as binary_file:
@@ -109,6 +113,7 @@ def checkout(document_id):
 
     body = {
         'document_id': document_id,
+        'session_token': session_token,
     }
 
     response = post_request(
@@ -134,6 +139,7 @@ def grant(document_id, target_user, access, duration):
         'target_user': target_user,
         'access': access,
         'duration': duration,
+        'session_token': session_token,
     }
 
     response = post_request(
@@ -151,6 +157,7 @@ def delete(document_id):
 
     body = {
         'document_id': document_id,
+        'session_token': session_token,
     }
 
     response = post_request(
@@ -170,7 +177,9 @@ def logout():
     for document_id in checked_out_documents:
         checkin(document_id, 2)
 
-    body = {}
+    body = {
+        'session_token': session_token,
+    }
 
     response = post_request(
         server_name=server_name,
