@@ -1,4 +1,5 @@
 import os
+import glob
 import shutil
 import requests
 
@@ -56,6 +57,15 @@ def _sign_statement(private_key_path, message):
     return signed_message
 
 
+def _clear_files():
+    checkin_files = glob.glob(CHECK_IN_DIR)
+    checkout_files = glob.glob(CHECK_OUT_DIR)
+
+    files = checkin_files + checkout_files
+    for file_ in files:
+        os.remove(file_)
+
+
 def login(user_id, private_key_path):
 
     statement = 'Client%s as User%s logs into the Server' % (1, user_id)
@@ -77,6 +87,8 @@ def login(user_id, private_key_path):
     )
 
     session_token = response['session_token']
+    if session_token:
+        _clear_files()
 
     return response
 
