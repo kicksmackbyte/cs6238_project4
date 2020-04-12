@@ -1,13 +1,16 @@
 import os
+import shutil
 import requests
 
 
 import Crypto.Hash.MD5 as MD5
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+CHECK_OUT_DIR = os.path.join(BASE_DIR, 'documents', 'checkout')
+CHECK_IN_DIR = os.path.join(BASE_DIR, 'documents', 'checkin')
 
 
-gt_username = 'agarcia327'   # TODO: Replace with your gt username within quotes
+gt_username = 'agarcia327'
 server_name = 'secure-shared-store'
 node_certificate = 'certs/CA.crt'
 node_key = 'certs/CA.key'
@@ -63,9 +66,9 @@ def login(user_id, filename):
     signed_statement = private_key.sign(statement)
 
     body = {
-        'user-id': user_id,
+        'user_id': user_id,
         'statement': statement,
-        'signed-statement': signed_statement,
+        'signed_statement': signed_statement,
     }
 
     response = post_request(
@@ -81,14 +84,18 @@ def login(user_id, filename):
 
 def checkin(document_id, security_flag):
 
-    #TODO: if document_id exists in checkout folder must move to checkin folder
+    checked_out_file = os.path.join(CHECK_OUT_DIR, document_id)
+    checked_in_file = os.path.join(CHECK_IN_DIR, document_id)
+
+    if os.path.isfile(checked_out_file):
+        shutil.move(checked_out_file, checked_in_file)
 
     body = {
         'document_id': document_id,
         'security_flag': security_flag,
     }
 
-    with open(document_id, 'rb') as binary_file:
+    with open(checked_in_file, 'rb') as binary_file:
         body['binary_file'] = binary_file
 
     response = post_request(
@@ -116,7 +123,7 @@ def checkout(document_id):
         node_key=node_key,
     )
 
-    output_path = os.path.join(BASE_DIR, 'documents', 'checkin', document_id)
+    output_path = os.path.join(BASE_DIR, 'documents', 'checkout', document_id)
     with open(output_path, 'wb') as document:
         binary_file = response.content['document']
         document.write(binary_file)
@@ -163,9 +170,11 @@ def delete(document_id):
 
 def logout():
 
-    checked_out_documents = [] #TODO: Read documents/checkedout directory
+    checked_out_documents = os.listdir(CHECK_OUT_DIR)
     for document_id in checked_out_documents:
         checkin(document_id, 2)
+
+    body = {}
 
     response = post_request(
         server_name=server_name,
