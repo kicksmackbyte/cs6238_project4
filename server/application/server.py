@@ -3,11 +3,22 @@ from flask_restful import Resource, Api
 
 from middleware import middleware
 
+import os
 from functools import wraps
+from datetime import datetime
+
+import Crypto.Hash.MD5 as MD5
+from Crypto.PublicKey import RSA
 
 
 secure_shared_service = Flask(__name__)
 api = Api(secure_shared_service)
+
+JWT_ALGORITHM = 'HS256'
+API_KEY = 'uytv3a0p84dh9xs2gj3n9xlnbcimrllx'
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PUBLIC_KEY_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def check_permission(permission):
@@ -52,18 +63,43 @@ class welcome(Resource):
 
 class login(Resource):
 
+    def __generate_session_token(self, user_id):
+
+        timestamp = datetime.utcnow()
+
+        payload = {
+                    'user_id': user_id,
+                    'iat': timestamp,
+                }
+
+        encoded_jwt = jwt.encode(payload, API_KEY, algorithm=JWT_ALGORITHM).decode('utf-8')
+
+        return encoded_jwt
+
+
+    def _get_public_key(user_id):
+        public_key_path = os.path.join(PUBLIC_KEY_DIR, user_id+'.pub')
+
+        with open(public_key_path, 'r') as public_key_file:
+            public_key = RSA.importKey(public_key_file)
+
+        return public_key
+
+
     def post(self):
         data = request.get_json()
 
-        # TODO: Implement login functionality
-        '''
-            # TODO: Verify the signed statement.
-            Response format for success and failure are given below. The same
-            keys ('status', 'message', 'session_token') should be used.
-        '''
+        user_id = data['user_id']
+        statement = data['statement']
+        signed_statement = data['signed_statement']
+
+        public_key = self._get_public_key(user_id)
+        decrypted_statement = public_key.decrypt(signed_statement)
+        success = statement == decrypted_statement
+
         if success:
-            session_token = '' # TODO: Generate session token
-            # Similar response format given below can be used for all the other functions
+            session_token = self.__generate_session_token(user_id)
+
             response = {
                 'status': 200,
                 'message': 'Login Successful',
