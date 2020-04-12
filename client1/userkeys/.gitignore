@@ -1,0 +1,2 @@
+# TODO: store private key here (no passphrase)
+# You can use either ssh-keygen or openssl for key generation, as long as the generated keys work for signing and verification. Be sure to use the extension “.key” for private keys and “.pub” for public keys.
