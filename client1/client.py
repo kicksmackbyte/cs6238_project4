@@ -6,12 +6,14 @@ import requests
 
 import Crypto.Hash.MD5 as MD5
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CHECK_OUT_DIR = os.path.join(BASE_DIR, 'documents', 'checkout')
 CHECK_IN_DIR = os.path.join(BASE_DIR, 'documents', 'checkin')
 
 
+client_name = os.path.basename(BASE_DIR)
 gt_username = 'agarcia327'
 server_name = 'secure-shared-store'
 node_certificate = 'certs/CA.crt'
@@ -48,11 +50,11 @@ def post_request(server_name, action, body, node_certificate, node_key):
 def _sign_statement(private_key_path, message):
     private_key = None
 
-    with open(private_key_path, 'r') as private_key_file:
-        private_key = RSA.importKey(private_key_file)
+    with open(private_key_path, 'r', encoding='utf-8') as private_key_file:
+        private_key = RSA.importKey(private_key_file.read())
 
-    hashed_message = MD5.new(message).digest()
-    signed_message = private_key.encrypt(hashed_message)
+    cipher_rsa = PKCS1_OAEP.new(private_key)
+    signed_message = cipher_rsa.encrypt(message.encode())
 
     return signed_message
 
@@ -68,7 +70,7 @@ def _clear_files():
 
 def login(user_id, private_key_path):
 
-    statement = 'Client%s as User%s logs into the Server' % (1, user_id)
+    statement = '%s as %s logs into the Server' % (client_name, user_id)
 
     signed_statement = _sign_statement(private_key_path, statement)
 
@@ -219,6 +221,10 @@ def main():
             perform these actions in a loop until they logout. This mapping should
             be maintained in your implementation for the options.
     '''
+    user_id = 'user1'
+    private_key_path = 'userkeys/user1.key'
+
+    login(user_id, private_key_path)
 
 
 if __name__ == '__main__':
