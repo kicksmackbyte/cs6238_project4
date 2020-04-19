@@ -106,6 +106,13 @@ class checkin(Resource):
 
     def post(self):
         data = request.get_json()
+        document_id = data['document_id']
+        security_flag = data['security_flag']
+        binary_file = data['binary_file']
+
+        file_ = base64.b64decode(binary_file)
+        with open(document_id, 'wb') as output_file:
+            output_file.write(file_)
 
         # TODO: Implement checkin functionality
         '''
@@ -114,6 +121,11 @@ class checkin(Resource):
             2) 702 - Access denied to check in
             3) 700 - Other failures
         '''
+
+        response = {
+            'status': 200,
+            'message': 'Document Successfully checked in',
+        }
 
         return jsonify(response)
 
