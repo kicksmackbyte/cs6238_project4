@@ -3,4 +3,5 @@ CA/CA.srl
 client?/certs/*
 client?/agarcia327
 client?/documents
+server/application/documents
 *.sw?
