@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "3ba2424b5522e7f1604684b1f291fbd157dcc037aae9937e654d84be1335d05b"
+            "sha256": "4b67831f266630f147e1da06abec87095463d8c864b85dc24571e0a8f5c5c3eb"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.7"
+            "python_version": "2.7"
         },
         "sources": [
             {
@@ -88,6 +88,15 @@
             "index": "pypi",
             "version": "==2.9"
         },
+        "enum34": {
+            "hashes": [
+                "sha256:a98a201d6de3f2ab3db284e70a33b0f896fbf35f8086594e8c9e74b909058d53",
+                "sha256:c3858660960c984d6ab0ebad691265180da2b43f07e061c0f8dca9ef3cffd328",
+                "sha256:cce6a7477ed816bd2542d03d53db9f0db935dd013b70f336a95c73979289f248"
+            ],
+            "markers": "python_version < '3'",
+            "version": "==1.1.10"
+        },
         "flask": {
             "hashes": [
                 "sha256:4efa1ae2d7c9865af48986de8aeb8504bf32c7f3d6fdc9353d34b21f4b127060",
@@ -104,6 +113,14 @@
             "index": "pypi",
             "version": "==0.3.8"
         },
+        "ipaddress": {
+            "hashes": [
+                "sha256:6e0f4a39e66cb5bb9a137b00276a2eff74f93b71dcbdad6f10ff7df9d3557fcc",
+                "sha256:b7f8e0369580bb4a24d5ba1d7cc29660a4a6987763faf1d8a8046830e020e7e2"
+            ],
+            "markers": "python_version < '3'",
+            "version": "==1.0.23"
+        },
         "itsdangerous": {
             "hashes": [
                 "sha256:321b033d07f2a4136d3ec762eac9f16a10ccd60f53c0c91af90217ace7ba1f19",
@@ -113,10 +130,10 @@
         },
         "jinja2": {
             "hashes": [
-                "sha256:93187ffbc7808079673ef52771baa950426fd664d3aad1d0fa3e95644360e250",
-                "sha256:b0eaf100007721b5c16c1fc1eecb87409464edc10469ddc9a22a27a99123be49"
+                "sha256:89aab215427ef59c34ad58735269eb58b1a5808103067f7bb9d5836c651b3bb0",
+                "sha256:f0a4641d3cf955324a89c04f3d94663aa4d638abe8f733ecd3582848e1c37035"
             ],
-            "version": "==2.11.1"
+            "version": "==2.11.2"
         },
         "markupsafe": {
             "hashes": [
