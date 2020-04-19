@@ -64,9 +64,6 @@ def _sign_statement(private_key_path, message):
 
     hash_ = MD5.new(message).digest()
     signed_message = private_key.sign(hash_, '')
-    #cipher_rsa = PKCS1_OAEP.new(private_key)
-    #encoded_message = message.encode()
-    #signed_message = cipher_rsa.encrypt(encoded_message)
 
     return signed_message
 
@@ -85,7 +82,6 @@ def login(user_id, private_key_path):
     statement = '%s as %s logs into the Server' % (client_name, user_id)
 
     signed_statement = _sign_statement(private_key_path, statement)
-    signed_statement = base64.b64encode(signed_statement)
 
     body = {
         'user_id': user_id,
@@ -101,6 +97,7 @@ def login(user_id, private_key_path):
         node_key=node_key,
     )
 
+    response = response.json()
     session_token = response['session_token']
     if session_token:
         _clear_files()
