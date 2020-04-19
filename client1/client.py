@@ -93,6 +93,7 @@ def _clear_files():
 
 
 def login(user_id, private_key_path):
+    global session_token
 
     statement = '%s as %s logs into the Server' % (client_name, user_id)
 
@@ -121,6 +122,7 @@ def login(user_id, private_key_path):
 
 
 def checkin(document_id, security_flag):
+    global session_token
 
     checked_out_file = os.path.join(CHECK_OUT_DIR, document_id)
     checked_in_file = os.path.join(CHECK_IN_DIR, document_id)
@@ -135,7 +137,7 @@ def checkin(document_id, security_flag):
     }
 
     with io.open(checked_in_file, 'rb') as binary_file:
-        body['binary_file'] = binary_file.read()
+        body['binary_file'] = base64.b64encode(binary_file.read())
 
     response = post_request(
         server_name=server_name,
@@ -149,6 +151,7 @@ def checkin(document_id, security_flag):
 
 
 def checkout(document_id):
+    global session_token
 
     body = {
         'document_id': document_id,
@@ -172,6 +175,7 @@ def checkout(document_id):
 
 
 def grant(document_id, target_user, access, duration):
+    global session_token
 
     body = {
         'document_id': document_id,
@@ -193,6 +197,7 @@ def grant(document_id, target_user, access, duration):
 
 
 def delete(document_id):
+    global session_token
 
     body = {
         'document_id': document_id,
@@ -211,6 +216,7 @@ def delete(document_id):
 
 
 def logout():
+    global session_token
 
     checked_out_documents = os.listdir(CHECK_OUT_DIR)
     for document_id in checked_out_documents:
@@ -252,10 +258,12 @@ def main():
     add_cert()
     login(user_id, private_key_path)
 
-    with open(os.path.join(CHECK_OUT_DIR, 'poop'), 'w') as outfile:
-        outfile.write('pee')
+    source_shin = '/home/cs6238/Downloads/shin.jpg'
+    dest_shin = os.path.join(CHECK_OUT_DIR, 'shin.jpg')
 
-    checkin('poop', 0)
+    shutil.copyfile(source_shin, dest_shin)
+
+    checkin('shin.jpg', 0)
     logout()
 
 
