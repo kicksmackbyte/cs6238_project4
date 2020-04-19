@@ -166,10 +166,13 @@ def checkout(document_id):
         node_key=node_key,
     )
 
+    response = response.json()
+
     output_path = os.path.join(BASE_DIR, 'documents', 'checkout', document_id)
     with io.open(output_path, 'wb') as document:
         binary_file = response.content['document']
-        document.write(binary_file)
+        file_ = base64.b64decode(binary_file)
+        document.write(file_)
 
     return response
 
@@ -258,12 +261,25 @@ def main():
     add_cert()
     login(user_id, private_key_path)
 
+    import pdb; pdb.set_trace()
+
     source_shin = '/home/cs6238/Downloads/shin.jpg'
     dest_shin = os.path.join(CHECK_OUT_DIR, 'shin.jpg')
 
     shutil.copyfile(source_shin, dest_shin)
 
     checkin('shin.jpg', 0)
+
+    import pdb; pdb.set_trace()
+
+    checkout('shin.jpg')
+
+    import pdb; pdb.set_trace()
+
+    delete('shin.jpg')
+
+    import pdb; pdb.set_trace()
+
     logout()
 
 
