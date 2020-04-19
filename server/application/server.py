@@ -5,6 +5,7 @@ from middleware import middleware
 
 import os
 import io
+import jwt
 import base64
 from datetime import datetime
 
@@ -62,12 +63,9 @@ class login(Resource):
         signed_statement = data['signed_statement']
 
         public_key = self._get_public_key(user_id)
-        signed_statement = base64.b64decode(signed_statement)
 
-        import pdb; pdb.set_trace()
         hash_ = MD5.new(statement).digest()
-        decrypted_statement = public_key.verify(hash_, signed_statement)
-        success = statement == decrypted_statement
+        success = public_key.verify(hash_, signed_statement)
 
         if success:
             session_token = self.__generate_session_token(user_id)
