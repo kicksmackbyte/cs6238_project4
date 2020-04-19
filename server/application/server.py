@@ -10,7 +10,6 @@ from datetime import datetime
 
 import Crypto.Hash.MD5 as MD5
 from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_OAEP
 
 
 secure_shared_service = Flask(__name__)
@@ -51,9 +50,8 @@ class login(Resource):
         with io.open(public_key_path, 'r', encoding='utf-8') as public_key_file:
             public_key_content = public_key_file.read()
             public_key = RSA.importKey(public_key_content)
-            cipher_rsa = PKCS1_OAEP.new(public_key)
 
-        return cipher_rsa
+        return public_key
 
 
     def post(self):
@@ -64,12 +62,11 @@ class login(Resource):
         signed_statement = data['signed_statement']
 
         public_key = self._get_public_key(user_id)
-
-        signed_statement = signed_statement.encode()
-        signed_statement = signed_statement.decode('utf-8', 'backslashreplace')
         signed_statement = base64.b64decode(signed_statement)
 
-        decrypted_statement = public_key.decrypt(signed_statement)
+        import pdb; pdb.set_trace()
+        hash_ = MD5.new(statement).digest()
+        decrypted_statement = public_key.verify(hash_, signed_statement)
         success = statement == decrypted_statement
 
         if success:

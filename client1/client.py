@@ -62,9 +62,11 @@ def _sign_statement(private_key_path, message):
         private_key_content = private_key_file.read()
         private_key = RSA.importKey(private_key_content)
 
-    cipher_rsa = PKCS1_OAEP.new(private_key)
-    encoded_message = message.encode()
-    signed_message = cipher_rsa.encrypt(encoded_message)
+    hash_ = MD5.new(message).digest()
+    signed_message = private_key.sign(hash_, '')
+    #cipher_rsa = PKCS1_OAEP.new(private_key)
+    #encoded_message = message.encode()
+    #signed_message = cipher_rsa.encrypt(encoded_message)
 
     return signed_message
 
