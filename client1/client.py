@@ -98,7 +98,7 @@ def login(user_id, private_key_path):
     )
 
     response = response.json()
-    session_token = response['session_token']
+    session_token = response.get('session_token')
     if session_token:
         _clear_files()
 
