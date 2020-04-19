@@ -1,4 +1,6 @@
 import os
+import base64
+import io
 import glob
 import json
 import requests
@@ -46,8 +48,9 @@ def post_request(server_name, action, body, node_certificate, node_key):
         cert=(node_certificate, node_key),
     )
 
-    with open(gt_username, 'w') as f:
-        f.write(response.content)
+    with io.open(gt_username, 'w') as f:
+        response_content = response.content.decode('utf-8')
+        f.write(response_content)
 
     return response
 
@@ -55,7 +58,7 @@ def post_request(server_name, action, body, node_certificate, node_key):
 def _sign_statement(private_key_path, message):
     private_key = None
 
-    with open(private_key_path, 'r', encoding='utf-8') as private_key_file:
+    with io.open(private_key_path, 'r', encoding='utf-8') as private_key_file:
         private_key_content = private_key_file.read()
         private_key = RSA.importKey(private_key_content)
 
@@ -80,7 +83,7 @@ def login(user_id, private_key_path):
     statement = '%s as %s logs into the Server' % (client_name, user_id)
 
     signed_statement = _sign_statement(private_key_path, statement)
-    signed_statement = signed_statement.decode('utf-8', 'backslashreplace')
+    signed_statement = base64.b64encode(signed_statement)
 
     body = {
         'user_id': user_id,
@@ -117,7 +120,7 @@ def checkin(document_id, security_flag):
         'session_token': session_token,
     }
 
-    with open(checked_in_file, 'rb') as binary_file:
+    with io.open(checked_in_file, 'rb') as binary_file:
         body['binary_file'] = binary_file
 
     response = post_request(
@@ -147,7 +150,7 @@ def checkout(document_id):
     )
 
     output_path = os.path.join(BASE_DIR, 'documents', 'checkout', document_id)
-    with open(output_path, 'wb') as document:
+    with io.open(output_path, 'wb') as document:
         binary_file = response.content['document']
         document.write(binary_file)
 

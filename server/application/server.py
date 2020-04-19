@@ -4,8 +4,8 @@ from flask_restful import Resource, Api
 from middleware import middleware
 
 import os
+import io
 import base64
-from functools import wraps
 from datetime import datetime
 
 import Crypto.Hash.MD5 as MD5
@@ -21,40 +21,6 @@ API_KEY = 'uytv3a0p84dh9xs2gj3n9xlnbcimrllx'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PUBLIC_KEY_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'application', 'userpublickeys')
-
-
-def check_permission(permission):
-    @wraps(permission)
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            nonlocal permission
-
-            auth_header = request.headers.get('Authorization')
-            if auth_header:
-                try:
-                    auth_token = auth_header.split(' ')[1]
-                except IndexError:
-                    response = {
-                            'status': 'fail',
-                            'message': 'Bearer token malformed',
-                        }
-
-                    return response
-            else:
-                auth_token = None
-
-            if auth_token:
-                token_data = jwt.decode(auth_token)
-                access = token_data.get(permission)
-
-                if not access:
-                    raise Exception('not authorized')
-
-            return func(*args, **kwargs)
-
-        return wrapper
-    return decorator
 
 
 class welcome(Resource):
@@ -82,7 +48,7 @@ class login(Resource):
     def _get_public_key(self, user_id):
         public_key_path = os.path.join(PUBLIC_KEY_DIR, user_id+'.pub')
 
-        with open(public_key_path, 'r', encoding='utf-8') as public_key_file:
+        with io.open(public_key_path, 'r', encoding='utf-8') as public_key_file:
             public_key_content = public_key_file.read()
             public_key = RSA.importKey(public_key_content)
             cipher_rsa = PKCS1_OAEP.new(public_key)
@@ -124,7 +90,6 @@ class login(Resource):
 
 
 class checkout(Resource):
-    method_decorators = [check_permission('checkout')]
 
     def post(self):
         data = request.get_json()
@@ -143,7 +108,6 @@ class checkout(Resource):
 
 
 class checkin(Resource):
-    method_decorators = [check_permission('checkin')]
 
     def post(self):
         data = request.get_json()
@@ -160,7 +124,6 @@ class checkin(Resource):
 
 
 class grant(Resource):
-    method_decorators = [check_permission('grant')]
 
     def post(self):
         data = request.get_json()
@@ -177,7 +140,6 @@ class grant(Resource):
 
 
 class delete(Resource):
-    method_decorators = [check_permission('delete')]
 
     def post(self):
         data = request.get_json()
