@@ -162,6 +162,11 @@ class logout(Resource):
             2) 700 - Failed to log out
         '''
 
+        response = {
+            'status': 200,
+            'message': 'Logout Successful',
+        }
+
         return jsonify(response)
 
 
