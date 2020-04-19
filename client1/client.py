@@ -1,28 +1,44 @@
-import os
-import itertools
 import base64
-import io
+import certifi
 import glob
+import io
+import itertools
 import json
+import os
 import requests
 import shutil
 
 
 import Crypto.Hash.MD5 as MD5
 from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_OAEP
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CHECK_OUT_DIR = os.path.join(BASE_DIR, 'documents', 'checkout')
 CHECK_IN_DIR = os.path.join(BASE_DIR, 'documents', 'checkin')
 
 
-client_name = os.path.basename(BASE_DIR)
 gt_username = 'agarcia327'
 server_name = 'secure-shared-store'
-node_certificate = 'certs/%s.crt' % client_name
-node_key = 'certs/%s.key' % client_name
+
+
+client_name = os.path.basename(BASE_DIR)
+node_certificate = os.path.join(BASE_DIR, 'certs', '%s.crt' % client_name)
+node_key = os.path.join(BASE_DIR, 'certs', '%s.key' % client_name)
+other_cert = os.path.join(BASE_DIR, 'certs', 'CA.crt')
+
 session_token = None
+
+
+def add_cert():
+    cafile = certifi.where()
+
+    with open(other_cert, 'rb') as infile:
+        customca = infile.read()
+
+    with open(cafile, 'ab') as outfile:
+        outfile.write(customca)
+
 
 
 ''' <!!! DO NOT MODIFY THIS FUNCTION !!!>'''
@@ -233,6 +249,7 @@ def main():
     user_id = 'user1'
     private_key_path = 'userkeys/user1.key'
 
+    add_cert()
     login(user_id, private_key_path)
     logout()
 
