@@ -2,4 +2,5 @@ create_certs.bat
 CA/CA.srl
 client?/certs/*
 client?/agarcia327
+client?/documents
 *.sw?
