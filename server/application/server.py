@@ -23,8 +23,9 @@ API_KEY = 'uytv3a0p84dh9xs2gj3n9xlnbcimrllx'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_KEY_DIR = os.path.join(BASE_DIR, 'userpublickeys')
 
-SERVER_PRIVATE_KEY = os.path.join(BASE_DIR, 'certs', 'secure-shared-store.key')
-SERVER_PUBLIC_KEY = os.path.join(BASE_DIR, 'certs', 'secure-shared-store.pub')
+SERVER_DIR = os.path.dirname(BASE_DIR)
+SERVER_PRIVATE_KEY = os.path.join(SERVER_DIR, 'certs', 'secure-shared-store.key')
+SERVER_PUBLIC_KEY = os.path.join(SERVER_DIR, 'certs', 'secure-shared-store.pub')
 
 DOCUMENTS_DIR = os.path.join(BASE_DIR, 'documents')
 SIGNED_DOCUMENTS_DIR = os.path.join(BASE_DIR, 'signed_documents')
@@ -110,6 +111,7 @@ class checkout(Resource):
         signed_document = os.path.join(SIGNED_DOCUMENTS_DIR, document_id)
         with io.open(signed_document, 'rb') as binary_file:
             signed_data = binary_file.read()
+            signed_data = (long(signed_data), )
 
             hash_ = MD5.new(document).digest()
             verified = public_key.verify(hash_, signed_data)
@@ -167,6 +169,7 @@ class checkin(Resource):
         signed_document = private_key.sign(hash_, '')
 
         with open(os.path.join(SIGNED_DOCUMENTS_DIR, document_id), 'wb') as output_file:
+            signed_document = str(signed_document[0])
             output_file.write(signed_document)
 
 
@@ -297,7 +300,14 @@ api.add_resource(logout, '/logout')
 
 
 def main():
-	secure_shared_service.run(debug=True)
+
+    try:
+        os.makedirs(DOCUMENTS_DIR)
+        os.makedirs(SIGNED_DOCUMENTS_DIR)
+    except Exception as e:
+        pass
+
+    secure_shared_service.run(debug=True)
 
 
 if __name__ == '__main__':
