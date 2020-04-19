@@ -4,4 +4,5 @@ client?/certs/*
 client?/agarcia327
 client?/documents
 server/application/documents
+server/application/signed_documents
 *.sw?
