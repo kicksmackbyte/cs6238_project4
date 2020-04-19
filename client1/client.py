@@ -170,7 +170,7 @@ def checkout(document_id):
 
     output_path = os.path.join(BASE_DIR, 'documents', 'checkout', document_id)
     with io.open(output_path, 'wb') as document:
-        binary_file = response.content['document']
+        binary_file = response['document']
         file_ = base64.b64decode(binary_file)
         document.write(file_)
 
