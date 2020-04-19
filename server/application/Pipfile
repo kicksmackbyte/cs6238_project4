@@ -11,6 +11,7 @@ cryptography = "*"
 flask-restful = "*"
 pycrypto = "*"
 pyjwt = "*"
+enum34 = "*"
 
 [requires]
 python_version = "2.7"

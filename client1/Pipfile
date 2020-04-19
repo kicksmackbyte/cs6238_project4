@@ -9,6 +9,7 @@ verify_ssl = true
 requests = "*"
 pycrypto = "*"
 certifi = "*"
+enum34 = "*"
 
 [requires]
 python_version = "2.7"
