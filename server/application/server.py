@@ -19,8 +19,9 @@ api = Api(secure_shared_service)
 JWT_ALGORITHM = 'HS256'
 API_KEY = 'uytv3a0p84dh9xs2gj3n9xlnbcimrllx'
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PUBLIC_KEY_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'application', 'userpublickeys')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PUBLIC_KEY_DIR = os.path.join(BASE_DIR, 'userpublickeys')
+DOCUMENTS_DIR = os.path.join(BASE_DIR, 'documents')
 
 
 class welcome(Resource):
@@ -111,7 +112,7 @@ class checkin(Resource):
         binary_file = data['binary_file']
 
         file_ = base64.b64decode(binary_file)
-        with open(document_id, 'wb') as output_file:
+        with open(os.path.join(DOCUMENTS_DIR, document_id), 'wb') as output_file:
             output_file.write(file_)
 
         # TODO: Implement checkin functionality
