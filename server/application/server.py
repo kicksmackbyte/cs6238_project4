@@ -90,6 +90,19 @@ class checkout(Resource):
     def post(self):
         data = request.get_json()
 
+        document_id = data['document_id']
+        document = os.path.join(DOCUMENTS_DIR, document_id)
+
+        response = {
+            'status': 200,
+            'message': 'Document Successfully checked out',
+        }
+
+
+        with open(document, 'rb') as binary_file:
+            response['binary_file'] = base64.b64encode(binary_file.read())
+
+
         # TODO: Implement checkout functionality
         '''
             Expected response status codes
@@ -107,6 +120,7 @@ class checkin(Resource):
 
     def post(self):
         data = request.get_json()
+
         document_id = data['document_id']
         security_flag = data['security_flag']
         binary_file = data['binary_file']
@@ -152,14 +166,36 @@ class delete(Resource):
     def post(self):
         data = request.get_json()
 
-        # TODO: Implement delete functionality
-        '''
-            Expected response status codes:
-            1) 200 - Successfully deleted the file
-            2) 702 - Access denied to delete file
-            3) 704 - Delete failed since file not found on the server
-            4) 700 - Other failures
-        '''
+        document_id = data['document_id']
+        document = os.path.join(DOCUMENTS_DIR, document_id)
+
+
+        status = 700
+        message = 'Other failures'
+
+
+        try:
+            if False:
+                status = 702
+                message = 'Access denied to delete file'
+
+            else:
+                os.remove(document)
+
+                status = 200
+                message = 'Successfully deleted the file'
+
+        except OSError as e:
+
+            if e.errno == errno.ENOENT:
+                status = 704
+                message = 'Delete failed since file not found on the server'
+
+
+        response = {
+            'status': status,
+            'message': message,
+        }
 
         return jsonify(response)
 
