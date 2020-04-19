@@ -18,7 +18,7 @@ JWT_ALGORITHM = 'HS256'
 API_KEY = 'uytv3a0p84dh9xs2gj3n9xlnbcimrllx'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PUBLIC_KEY_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PUBLIC_KEY_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'application', 'userpublickeys')
 
 
 def check_permission(permission):
@@ -77,7 +77,7 @@ class login(Resource):
         return encoded_jwt
 
 
-    def _get_public_key(user_id):
+    def _get_public_key(self, user_id):
         public_key_path = os.path.join(PUBLIC_KEY_DIR, user_id+'.pub')
 
         with open(public_key_path, 'r') as public_key_file:
@@ -93,6 +93,7 @@ class login(Resource):
         statement = data['statement']
         signed_statement = data['signed_statement']
 
+        import pdb; pdb.set_trace()
         public_key = self._get_public_key(user_id)
         decrypted_statement = public_key.decrypt(signed_statement)
         success = statement == decrypted_statement
