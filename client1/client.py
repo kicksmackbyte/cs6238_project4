@@ -1,7 +1,8 @@
 import os
 import glob
-import shutil
+import json
 import requests
+import shutil
 
 
 import Crypto.Hash.MD5 as MD5
@@ -15,9 +16,11 @@ CHECK_IN_DIR = os.path.join(BASE_DIR, 'documents', 'checkin')
 
 client_name = os.path.basename(BASE_DIR)
 gt_username = 'agarcia327'
-server_name = 'secure-shared-store'
-node_certificate = 'certs/CA.crt'
-node_key = 'certs/CA.key'
+#TODO: Change back
+#server_name = 'secure-shared-store'
+server_name = 'http://localhost:5000'
+node_certificate = 'certs/%s.crt' % client_name
+node_key = 'certs/%s.key' % client_name
 session_token = None
 
 
@@ -29,7 +32,9 @@ def post_request(server_name, action, body, node_certificate, node_key):
     body parameter should in the json format.
     '''
 
-    request_url= 'https://{}/{}'.format(server_name,action)
+#TODO: Change back
+    #request_url= 'https://{}/{}'.format(server_name,action)
+    request_url= '{}/{}'.format(server_name,action)
     request_headers = {
         'Content-Type': "application/json"
     }
@@ -77,7 +82,7 @@ def login(user_id, private_key_path):
     body = {
         'user_id': user_id,
         'statement': statement,
-        'signed_statement': signed_statement,
+        'signed_statement': signed_statement.decode('utf-8', 'backslashreplace'),
     }
 
     response = post_request(
