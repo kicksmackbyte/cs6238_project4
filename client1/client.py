@@ -19,9 +19,7 @@ CHECK_IN_DIR = os.path.join(BASE_DIR, 'documents', 'checkin')
 
 client_name = os.path.basename(BASE_DIR)
 gt_username = 'agarcia327'
-#TODO: Change back
-#server_name = 'secure-shared-store'
-server_name = 'http://localhost:5000'
+server_name = 'secure-shared-store'
 node_certificate = 'certs/%s.crt' % client_name
 node_key = 'certs/%s.key' % client_name
 session_token = None
@@ -35,9 +33,8 @@ def post_request(server_name, action, body, node_certificate, node_key):
     body parameter should in the json format.
     '''
 
-#TODO: Change back
-    #request_url= 'https://{}/{}'.format(server_name,action)
-    request_url= '{}/{}'.format(server_name, action)
+    request_url= 'https://{}/{}'.format(server_name,action)
+
     request_headers = {
         'Content-Type': "application/json"
     }
