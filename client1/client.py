@@ -248,6 +248,15 @@ def logout():
 
 
 def main():
+
+    add_cert()
+
+    try:
+        os.makedirs(CHECK_OUT_DIR)
+        os.makedirs(CHECK_IN_DIR)
+    except Exception as e:
+        pass
+
     '''
         # TODO: Authenticate the user by calling login.
             If the login is successful, provide the following options to the user
@@ -265,7 +274,6 @@ def main():
     user_id = 'user1'
     private_key_path = 'userkeys/user1.key'
 
-    add_cert()
     login(user_id, private_key_path)
 
     import pdb; pdb.set_trace()
@@ -275,7 +283,7 @@ def main():
 
     shutil.copyfile(source_shin, dest_shin)
 
-    checkin('shin.jpg', SecurityFlag.Confidentiality)
+    checkin('shin.jpg', SecurityFlag.Integrity)
 
     import pdb; pdb.set_trace()
 
