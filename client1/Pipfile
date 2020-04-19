@@ -7,7 +7,7 @@ verify_ssl = true
 
 [packages]
 requests = "*"
-pycryptodome = "*"
+pycrypto = "*"
 
 [requires]
 python_version = "2.7"
