@@ -34,7 +34,7 @@ def post_request(server_name, action, body, node_certificate, node_key):
 
 #TODO: Change back
     #request_url= 'https://{}/{}'.format(server_name,action)
-    request_url= '{}/{}'.format(server_name,action)
+    request_url= '{}/{}'.format(server_name, action)
     request_headers = {
         'Content-Type': "application/json"
     }
@@ -56,10 +56,12 @@ def _sign_statement(private_key_path, message):
     private_key = None
 
     with open(private_key_path, 'r', encoding='utf-8') as private_key_file:
-        private_key = RSA.importKey(private_key_file.read())
+        private_key_content = private_key_file.read()
+        private_key = RSA.importKey(private_key_content)
 
     cipher_rsa = PKCS1_OAEP.new(private_key)
-    signed_message = cipher_rsa.encrypt(message.encode())
+    encoded_message = message.encode()
+    signed_message = cipher_rsa.encrypt(encoded_message)
 
     return signed_message
 
@@ -78,11 +80,12 @@ def login(user_id, private_key_path):
     statement = '%s as %s logs into the Server' % (client_name, user_id)
 
     signed_statement = _sign_statement(private_key_path, statement)
+    signed_statement = signed_statement.decode('utf-8', 'backslashreplace')
 
     body = {
         'user_id': user_id,
         'statement': statement,
-        'signed_statement': signed_statement.decode('utf-8', 'backslashreplace'),
+        'signed_statement': signed_statement,
     }
 
     response = post_request(

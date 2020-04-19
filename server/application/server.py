@@ -4,11 +4,13 @@ from flask_restful import Resource, Api
 from middleware import middleware
 
 import os
+import base64
 from functools import wraps
 from datetime import datetime
 
 import Crypto.Hash.MD5 as MD5
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 
 
 secure_shared_service = Flask(__name__)
@@ -80,10 +82,12 @@ class login(Resource):
     def _get_public_key(self, user_id):
         public_key_path = os.path.join(PUBLIC_KEY_DIR, user_id+'.pub')
 
-        with open(public_key_path, 'r') as public_key_file:
-            public_key = RSA.importKey(public_key_file)
+        with open(public_key_path, 'r', encoding='utf-8') as public_key_file:
+            public_key_content = public_key_file.read()
+            public_key = RSA.importKey(public_key_content)
+            cipher_rsa = PKCS1_OAEP.new(public_key)
 
-        return public_key
+        return cipher_rsa
 
 
     def post(self):
@@ -93,8 +97,12 @@ class login(Resource):
         statement = data['statement']
         signed_statement = data['signed_statement']
 
-        import pdb; pdb.set_trace()
         public_key = self._get_public_key(user_id)
+
+        signed_statement = signed_statement.encode()
+        signed_statement = signed_statement.decode('utf-8', 'backslashreplace')
+        signed_statement = base64.b64decode(signed_statement)
+
         decrypted_statement = public_key.decrypt(signed_statement)
         success = statement == decrypted_statement
 
