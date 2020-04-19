@@ -12,6 +12,8 @@ import shutil
 import Crypto.Hash.MD5 as MD5
 from Crypto.PublicKey import RSA
 
+from enum import Enum
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CHECK_OUT_DIR = os.path.join(BASE_DIR, 'documents', 'checkout')
@@ -28,6 +30,11 @@ node_key = os.path.join(BASE_DIR, 'certs', '%s.key' % client_name)
 other_cert = os.path.join(BASE_DIR, 'certs', 'CA.crt')
 
 session_token = None
+
+
+class SecurityFlag(Enum):
+    Confidentiality = 1
+    Integrity = 2
 
 
 def add_cert():
@@ -132,7 +139,7 @@ def checkin(document_id, security_flag):
 
     body = {
         'document_id': document_id,
-        'security_flag': security_flag,
+        'security_flag': security_flag.value,
         'session_token': session_token,
     }
 
@@ -223,7 +230,7 @@ def logout():
 
     checked_out_documents = os.listdir(CHECK_OUT_DIR)
     for document_id in checked_out_documents:
-        checkin(document_id, 2)
+        checkin(document_id, SecurityFlag.Integrity)
 
     body = {
         'session_token': session_token,
@@ -268,7 +275,7 @@ def main():
 
     shutil.copyfile(source_shin, dest_shin)
 
-    checkin('shin.jpg', 0)
+    checkin('shin.jpg', SecurityFlag.Confidentiality)
 
     import pdb; pdb.set_trace()
 

@@ -8,6 +8,7 @@ import io
 import jwt
 import base64
 from datetime import datetime
+from enum import Enum
 
 import Crypto.Hash.MD5 as MD5
 from Crypto.PublicKey import RSA
@@ -21,7 +22,18 @@ API_KEY = 'uytv3a0p84dh9xs2gj3n9xlnbcimrllx'
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_KEY_DIR = os.path.join(BASE_DIR, 'userpublickeys')
+
+SERVER_PRIVATE_KEY = os.path.join(BASE_DIR, 'certs', 'secure-shared-store.key')
+SERVER_PUBLIC_KEY = os.path.join(BASE_DIR, 'certs', 'secure-shared-store.pub')
+
 DOCUMENTS_DIR = os.path.join(BASE_DIR, 'documents')
+SIGNED_DOCUMENTS_DIR = os.path.join(BASE_DIR, 'signed_documents')
+
+
+
+class SecurityFlag(Enum):
+    Confidentiality = 1
+    Integrity = 2
 
 
 class welcome(Resource):
@@ -87,6 +99,25 @@ class login(Resource):
 
 class checkout(Resource):
 
+    def _verify(self, document_id, document):
+        verified = False
+        public_key = None
+
+        with io.open(SERVER_PUBLIC_KEY, 'r', encoding='utf-8') as public_key_file:
+            public_key_content = public_key_file.read()
+            public_key = RSA.importKey(public_key_content)
+
+        signed_document = os.path.join(SIGNED_DOCUMENTS_DIR, document_id)
+        with io.open(signed_document, 'rb') as binary_file:
+            signed_data = binary_file.read()
+
+            hash_ = MD5.new(document).digest()
+            verified = public_key.verify(hash_, signed_data)
+
+
+        return verified
+
+
     def post(self):
         data = request.get_json()
 
@@ -100,7 +131,10 @@ class checkout(Resource):
 
 
         with open(document, 'rb') as binary_file:
-            response['document'] = base64.b64encode(binary_file.read())
+            data = binary_file.read()
+            verified = self._verify(document_id, data)
+
+            response['document'] = base64.b64encode(data)
 
 
         # TODO: Implement checkout functionality
@@ -118,16 +152,43 @@ class checkout(Resource):
 
 class checkin(Resource):
 
+    def _encrypt(self, document):
+        return document
+
+
+    def _sign(self, document_id, document):
+        private_key = None
+
+        with io.open(SERVER_PRIVATE_KEY, 'r', encoding='utf-8') as private_key_file:
+            private_key_content = private_key_file.read()
+            private_key = RSA.importKey(private_key_content)
+
+        hash_ = MD5.new(document).digest()
+        signed_document = private_key.sign(hash_, '')
+
+        with open(os.path.join(SIGNED_DOCUMENTS_DIR, document_id), 'wb') as output_file:
+            output_file.write(signed_document)
+
+
     def post(self):
         data = request.get_json()
 
         document_id = data['document_id']
-        security_flag = data['security_flag']
         binary_file = data['binary_file']
 
-        file_ = base64.b64decode(binary_file)
+        value = data['security_flag']
+        security_flag = SecurityFlag(value)
+
+
+        document = base64.b64decode(binary_file)
         with open(os.path.join(DOCUMENTS_DIR, document_id), 'wb') as output_file:
-            output_file.write(file_)
+
+            if security_flag == SecurityFlag.Confidentiality:
+                document = self._encrypt(document)
+            elif security_flag == SecurityFlag.Integrity:
+                self._sign(document_id, document)
+
+            output_file.write(document)
 
         # TODO: Implement checkin functionality
         '''
@@ -168,10 +229,17 @@ class delete(Resource):
 
         document_id = data['document_id']
         document = os.path.join(DOCUMENTS_DIR, document_id)
+        signed_document = os.path.join(SIGNED_DOCUMENTS_DIR, document_id)
 
 
         status = 700
         message = 'Other failures'
+
+
+        try:
+            os.remove(signed_document)
+        except Exception as e:
+            pass
 
 
         try:
