@@ -11,7 +11,11 @@ from datetime import datetime
 from enum import Enum
 
 import Crypto.Hash.MD5 as MD5
+
 from Crypto.PublicKey import RSA
+from Crypto.Cipher import AES
+
+from Crypto import Random
 
 
 secure_shared_service = Flask(__name__)
@@ -24,8 +28,10 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PUBLIC_KEY_DIR = os.path.join(BASE_DIR, 'userpublickeys')
 
 SERVER_DIR = os.path.dirname(BASE_DIR)
-SERVER_PRIVATE_KEY = os.path.join(SERVER_DIR, 'certs', 'secure-shared-store.key')
-SERVER_PUBLIC_KEY = os.path.join(SERVER_DIR, 'certs', 'secure-shared-store.pub')
+
+SERVER_KEY_DIR = os.path.join(SERVER_DIR, 'certs')
+SERVER_PRIVATE_KEY = os.path.join(SERVER_KEY_DIR, 'secure-shared-store.key')
+SERVER_PUBLIC_KEY = os.path.join(SERVER_KEY_DIR, 'secure-shared-store.pub')
 
 DOCUMENTS_DIR = os.path.join(BASE_DIR, 'documents')
 SIGNED_DOCUMENTS_DIR = os.path.join(BASE_DIR, 'signed_documents')
@@ -100,6 +106,21 @@ class login(Resource):
 
 class checkout(Resource):
 
+    def _decrypt(self, document_id, encrypted_document):
+        key = Random.new().read(AES.block_size)
+        key_path = os.path.join(SERVER_KEY_DIR, '%s.key' % document_id)
+
+        with open(key_path, 'rb') as output_file:
+            print('Writing (%s) to: %s' % (key, key_path))
+            output_file.write(key)
+
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(key, AES.MODE_CFB, iv)
+
+        encrypted_document = iv + cipher.encrypt(document)
+
+        return encrypted_document
+
     def _verify(self, document_id, document):
         verified = False
         public_key = None
@@ -154,8 +175,21 @@ class checkout(Resource):
 
 class checkin(Resource):
 
-    def _encrypt(self, document):
-        return document
+    def _encrypt(self, document_id, document):
+
+        key = Random.new().read(AES.block_size)
+        key_path = os.path.join(SERVER_KEY_DIR, '%s.key' % document_id)
+
+        with open(key_path, 'wb') as output_file:
+            print('Writing (%s) to: %s' % (key, key_path))
+            output_file.write(key)
+
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(key, AES.MODE_CFB, iv)
+
+        encrypted_document = iv + cipher.encrypt(document)
+
+        return encrypted_document
 
 
     def _sign(self, document_id, document):
@@ -187,7 +221,7 @@ class checkin(Resource):
         with open(os.path.join(DOCUMENTS_DIR, document_id), 'wb') as output_file:
 
             if security_flag == SecurityFlag.Confidentiality:
-                document = self._encrypt(document)
+                document = self._encrypt(document_id, document)
             elif security_flag == SecurityFlag.Integrity:
                 self._sign(document_id, document)
 
