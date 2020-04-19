@@ -83,8 +83,8 @@ def _sign_statement(private_key_path, message):
 
 
 def _clear_files():
-    checkin_files = (f for f in os.listdir(CHECK_IN_DIR) if os.path.isfile(os.path.join(CHECK_IN_DIR, f)))
-    checkout_files = (f for f in os.listdir(CHECK_OUT_DIR) if os.path.isfile(os.path.join(CHECK_OUT_DIR, f)))
+    checkin_files = (os.path.join(CHECK_IN_DIR, f) for f in os.listdir(CHECK_IN_DIR) if os.path.isfile(os.path.join(CHECK_IN_DIR, f)))
+    checkout_files = (os.path.join(CHECK_OUT_DIR, f) for f in os.listdir(CHECK_OUT_DIR) if os.path.isfile(os.path.join(CHECK_OUT_DIR, f)))
 
     files = itertools.chain(checkin_files, checkout_files)
 
@@ -135,7 +135,7 @@ def checkin(document_id, security_flag):
     }
 
     with io.open(checked_in_file, 'rb') as binary_file:
-        body['binary_file'] = binary_file
+        body['binary_file'] = binary_file.read()
 
     response = post_request(
         server_name=server_name,
@@ -251,6 +251,11 @@ def main():
 
     add_cert()
     login(user_id, private_key_path)
+
+    with open(os.path.join(CHECK_OUT_DIR, 'poop'), 'w') as outfile:
+        outfile.write('pee')
+
+    checkin('poop', 0)
     logout()
 
 
