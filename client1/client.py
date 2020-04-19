@@ -1,4 +1,5 @@
 import os
+import itertools
 import base64
 import io
 import glob
@@ -48,7 +49,7 @@ def post_request(server_name, action, body, node_certificate, node_key):
         cert=(node_certificate, node_key),
     )
 
-    with io.open(gt_username, 'w') as f:
+    with io.open(gt_username, 'a') as f:
         response_content = response.content.decode('utf-8')
         f.write(response_content)
 
@@ -69,10 +70,11 @@ def _sign_statement(private_key_path, message):
 
 
 def _clear_files():
-    checkin_files = glob.glob(CHECK_IN_DIR)
-    checkout_files = glob.glob(CHECK_OUT_DIR)
+    checkin_files = (f for f in os.listdir(CHECK_IN_DIR) if os.path.isfile(os.path.join(CHECK_IN_DIR, f)))
+    checkout_files = (f for f in os.listdir(CHECK_OUT_DIR) if os.path.isfile(os.path.join(CHECK_OUT_DIR, f)))
 
-    files = checkin_files + checkout_files
+    files = itertools.chain(checkin_files, checkout_files)
+
     for file_ in files:
         os.remove(file_)
 
@@ -235,6 +237,7 @@ def main():
     private_key_path = 'userkeys/user1.key'
 
     login(user_id, private_key_path)
+    logout()
 
 
 if __name__ == '__main__':
