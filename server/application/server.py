@@ -100,7 +100,7 @@ class checkout(Resource):
 
 
         with open(document, 'rb') as binary_file:
-            response['binary_file'] = base64.b64encode(binary_file.read())
+            response['document'] = base64.b64encode(binary_file.read())
 
 
         # TODO: Implement checkout functionality
